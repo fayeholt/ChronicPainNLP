@@ -1,4 +1,4 @@
-# chronic-pain-nlp
+# ChronicPainNLP
 
 A rule-based Python package for extracting pain regions, pain scores, neuropathic language, laterality, and pre/post progression signals from clinical text.
 
@@ -89,8 +89,8 @@ python -m build
 
 ## Citation
 
-if you use this software in research, please cite. If you use or modify the included decision rules, please also describe the rules-file version, decision-tree definition, and any institution-specific changes in your methods.
+If you use this software in research, please cite. If you use or modify the included decision rules, please also describe the rules-file version, decision-tree definition, and any institution-specific changes in your methods.
 
 ## License
 
-MIT. Replace the placeholder copyright holder in `LICENSE` before publishing.
+MIT. See License in repo.
