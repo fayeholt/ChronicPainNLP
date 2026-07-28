@@ -11,6 +11,7 @@ build/
 .env.*
 .DS_Store
 
+# Clinical/source data and patient-level artifacts must remain outside version control.
 data/
 datasets/
 private/
