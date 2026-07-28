@@ -1,0 +1,31 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+dist/
+build/
+.env
+.env.*
+.DS_Store
+
+# Never commit clinical/source data or derived patient-level artifacts
+data/
+datasets/
+private/
+outputs/
+results/
+*.csv
+*.tsv
+*.parquet
+*.feather
+*.xlsx
+*.xls
+*.db
+*.sqlite*
+*.jsonl
+
+# Streamlit secrets
+.streamlit/secrets.toml

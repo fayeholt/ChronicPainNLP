@@ -1,0 +1,276 @@
+version: 1
+
+sentence:
+  split_pattern: "(?<=[\\.\\n;])\\s+"
+
+truncate:
+  cutoff_patterns:
+  # add to these base on specific institution
+    - "active\\s+problem\\s+list"
+    - "\\bpast\\s+medical\\s+history\\b"
+    - "\\bpmh\\b"
+    - "\\bpast\\s+surgical\\s+history\\b"
+    
+pain_scores:
+  denom_regex: "(?:/\\s*10\\b|\\bout\\s+of\\s+10\\b)"
+  range_denom_regex: "\\b\\d+(?:\\.\\d+)?\\s*[-–]\\s*\\d+(?:\\.\\d+)?\\s*/\\s*10\\b"
+
+  general_patterns:
+    # Explicit denominator forms (single number or range, optional +/~ modifier)
+    - "\\b(\\d+(?:\\.\\d+)?\\s*[-–]\\s*\\d+(?:\\.\\d+)?[+~]?)\\s*(?:/|out\\s+of)\\s*10(?:\\.0+)?\\b"
+    - "\\b(\\d+(?:\\.\\d+)?[+~]?)\\s*(?:/|out\\s+of)\\s*10(?:\\.0+)?\\b"
+
+    # Bare-number patterns (no denominator, context implies pain score)
+    - "\\bpain\\s*rated(?:\\s*as)?[\\s\\-:=]*?(\\d+(?:\\.\\d+)?(?:\\s*[-–]\\s*\\d+(?:\\.\\d+)?[+~]?)?)\\b"
+    - "\\brated(?:\\s*as)?[\\s\\-:=]*?(\\d+(?:\\.\\d+)?(?:\\s*[-–]\\s*\\d+(?:\\.\\d+)?[+~]?)?)\\b"
+    - "\\bscore[\\s\\-:=]*?(\\d+(?:\\.\\d+)?(?:\\s*[-–]\\s*\\d+(?:\\.\\d+)?[+~]?)?)\\b"
+    - "\\bpain\\s*(?:is|as|score|level|severity)?[\\s\\-\\w]*?(\\d+(?:\\.\\d+)?(?:\\s*[-–]\\s*\\d+(?:\\.\\d+)?[+~]?)?)\\b"
+    - "\\bcurrent[\\-]?pain[\\s\\-:=]*?(\\d+(?:\\.\\d+)?(?:\\s*[-–]\\s*\\d+(?:\\.\\d+)?[+~]?)?)\\b"
+    - "\\bworst[\\-]?pain[\\s\\-:=]*?(\\d+(?:\\.\\d+)?(?:\\s*[-–]\\s*\\d+(?:\\.\\d+)?[+~]?)?)\\b"
+    - "\\baverage[\\-]?pain[\\s\\-:=]*?(\\d+(?:\\.\\d+)?(?:\\s*[-–]\\s*\\d+(?:\\.\\d+)?[+~]?)?)\\b"
+    - "\\bpain\\s*(?:level|intensity|severity)?[\\s\\-:=]*?(\\d+(?:\\.\\d+)?(?:\\s*[-–]\\s*\\d+(?:\\.\\d+)?[+~]?)?)\\b"
+    - "\\b(?:pain\\s*)?score\\s*(?:is|was|=|:)?[\\s\\-]*?(\\d+(?:\\.\\d+)?(?:\\s*[-–]\\s*\\d+(?:\\.\\d+)?[+~]?)?)\\b"
+    - "\\b(?:pain\\s*)?rating\\s*(?:is|was|=|:)?[\\s\\-]*?(\\d+(?:\\.\\d+)?(?:\\s*[-–]\\s*\\d+(?:\\.\\d+)?[+~]?)?)\\b"
+    - "\\b(?:pain\\s*)?reported[\\s\\-]*(?:as)?[\\s\\-:=]*?(\\d+(?:\\.\\d+)?(?:\\s*[-–]\\s*\\d+(?:\\.\\d+)?[+~]?)?)\\b"
+
+  # Regional pain patterns 
+  regional_patterns:
+    - >
+      \b(
+        back|backs|trapezius|paraspinal|upper back|lower back|spinal area|dorsal|
+        neck|necks|
+        shoulder|shoulders|deltoid|scapula|clavicle|
+        elbow|elbows|arm|arms|
+        hand|hands|palm|palms|thumb|thumbs|finger|fingers|knuckle|knuckles|
+        wrist|wrists|carpal area|
+        hip|hips|buttock|buttocks|glute|gluteal|pelvic area|
+        leg|legs|thigh|thighs|calf|calves|
+        ankle|ankles|tarsal area|
+        foot|feet|sole|arch|heel|
+        toe|toes|phalanges|
+        head|heads|scalp|forehead|temple|
+        skull|cranium|
+        buttock|buttocks|glute|gluteal|rear
+      )\b
+      [\s\-]*
+      (?:pain|painful)?
+      (?:\s*(?:is|was|were|rated|scored|rating|scoring|reported|reports|described|describes|noted|documented|measured|as\s+being))?
+      [\s\-:=]*
+      (\d+(?:\.\d+)?(?:\s*[-–]\s*\d+(?:\.\d+)?[+~]?)?)
+
+regions:
+  variants:
+    back: ["back", "backs", "trapezius", "paraspinal", "upper back", "lower back", "spinal area", "dorsal"]
+    neck: ["neck", "necks", "nape", "nape of neck"]
+    shoulder: ["shoulder", "shoulders", "deltoid", "scapula", "clavicle"]
+    elbow: ["elbow", "elbows", "arm", "arms", "olecranon"]
+    hand: ["hand", "hands", "palm", "palms", "thumb", "thumbs", "finger", "fingers", "knuckle", "knuckles"]
+    wrist: ["wrist", "wrists", "carpal area"]
+    hip: ["hip", "hips", "buttock", "glute", "gluteal", "pelvic area"]
+    leg: ["leg", "legs", "thigh", "thighs", "calf", "calves"]
+    ankle: ["ankle", "ankles", "tarsal area"]
+    foot: ["foot", "feet", "sole", "arch", "heel", "toes"]
+    toe: ["toe", "toes", "phalanges"]
+    head: ["head", "heads", "scalp", "forehead", "temple"]
+    skull: ["skull", "cranium"]
+    buttock: ["buttock", "buttocks", "glute", "gluteal", "rear"]
+
+  composite_labels:
+    "(CERVICAL, neck)": "CERVICAL_NECK"
+    "(CERVICAL, back)": "CERVICAL_BACK"
+    "(CERVICAL, shoulder)": "CERVICAL_ARMS"
+    "(CERVICAL, elbow)": "CERVICAL_ARMS"
+    "(CERVICAL, hand)": "CERVICAL_ARMS"
+    "(CERVICAL, wrist)": "CERVICAL_ARMS"
+
+    "(THORACIC, back)": "THORACIC_BACK"
+
+    "(LUM_SAC, back)": "LUM_SAC_BACK"
+    "(LUM_SAC, hip)": "LUM_SAC_LEGS"
+    "(LUM_SAC, leg)": "LUM_SAC_LEGS"
+    "(LUM_SAC, ankle)": "LUM_SAC_LEGS"
+    "(LUM_SAC, foot)": "LUM_SAC_LEGS"
+    "(LUM_SAC, toe)": "LUM_SAC_LEGS"
+
+    "(ALL, back)": "ALL_BACK"
+    "(ALL, neck)": "ALL_NECK"
+    "(ALL, shoulder)": "ALL_ARMS"
+    "(ALL, elbow)": "ALL_ARMS"
+    "(ALL, hand)": "ALL_ARMS"
+    "(ALL, wrist)": "ALL_ARMS"
+    "(ALL, hip)": "ALL_LEGS"
+    "(ALL, leg)": "ALL_LEGS"
+    "(ALL, ankle)": "ALL_LEGS"
+    "(ALL, foot)": "ALL_LEGS"
+    "(ALL, toe)": "ALL_LEGS"
+
+  back_false_positive_follow: "^\\s*(?:of|to|into|in|on|at|for|from|up|down|over|under|with|by)\\b"
+  back_false_positive_verbs: "^\\s*(?:to\\s+)?(?:work|school|normal|baseline|sleep|bed)\\b|^\\s*(?:again|later|soon|today|tomorrow)\\b|^\\s*(?:up|down)\\b"
+  back_anatomical_cues: "\\b(?:low\\s+back|upper\\s+back|mid\\s+back|lumbar|thoracic|cervical|spine|paraspinal)\\b"
+
+progression:
+  lumbar_chain: ["back", "hip", "leg", "ankle", "foot", "toe"]
+  cervical_chain: ["skull", "head", "neck", "shoulder", "elbow", "wrist", "hand"]
+  surgery_to_chains:
+    LUM_SAC:
+      - ["back", "hip", "leg", "ankle", "foot", "toe"]
+    CERVICAL:
+      - ["skull", "head", "neck", "shoulder", "elbow", "wrist", "hand"]
+    THORACIC: []
+    ALL:
+      - ["back", "hip", "leg", "ankle", "foot", "toe"]
+      - ["skull", "head", "neck", "shoulder", "elbow", "wrist", "hand"]
+
+laterality:
+  window_chars: 20
+  lateralizable_atomic_regions: ["shoulder", "leg", "arm", "hand", "foot"]
+  aliases:
+    L: ["\\bleft\\b", "\\blt\\b", "\\bl\\.\\b", "\\bL\\b"]
+    R: ["\\bright\\b", "\\brt\\b", "\\br\\.\\b", "\\bR\\b"]
+    B: ["\\bbilateral\\b", "\\bboth\\b", "\\bb\\/l\\b", "\\bbil\\b"]
+
+
+neuropathy:
+  persistence_cues:
+    - "\\bstill\\b"
+    - "\\bongoing\\b"
+    - "\\bstable\\b"
+  keywords:
+    - "neuropathic"
+    - "neuropathy"
+    - "nerve pain"
+    - "nerve-related pain"
+    - "nerve injury"
+    - "nerve damage"
+    - "radicular"
+    - "radiculopathy"
+    - "sciatica"
+    - "nerve root"
+    - "radiation"
+    - "radiating pain"
+    - "burning"
+    - "burning pain"
+    - "shooting"
+    - "shooting pain"
+    - "electric"
+    - "electric shock"
+    - "shock[-\\s]?like"
+    - "sharp"
+    - "sharp pain"
+    - "stabbing"
+    - "stabbing pain"
+    - "tingling"
+    - "pins[-\\s]?and[-\\s]?needles"
+    - "numb"
+    - "numbness"
+    - "decreased sensation"
+    - "loss of sensation"
+    - "paresthesia"
+    - "paresthesias"
+    - "allodynia"
+    - "hyperalgesia"
+    - "incision pain"
+    - "incisional pain"
+  incision_regex: "\\bincision(?:al)?\\b"
+
+negation:
+  cues:
+    - "\\bno\\b"
+    - "\\bnot\\b"
+    - "\\bwithout\\b"
+    - "\\bdenies?\\b"
+    - "\\bdenied\\b"
+    - "\\bnegative for\\b"
+    - "\\bfree of\\b"
+    - "\\babsence of\\b"
+    - "\\bno longer\\b"
+  preop_symptom_ignore_pattern: "\\bpre[\\s\\-]?op(?:erative)?\\s+(?:symptom(?:s)?|sx|symptomatology)\\b"
+  window_chars: 40
+  forward_look_chars: 20
+
+suppression:
+  absence_verbs:
+    - "deny(?:ies|ied)?"
+    - "\\bno\\b"
+    - "without"
+    - "free of"
+    - "absence of"
+    - "negative for"
+  stability_verbs:
+    - "stable"
+    - "unchanged"
+    - "ongoing"
+    - "persistent"
+    - "baseline"
+    - "chronic"
+  newness_negators:
+    - "no new"
+    - "denies new"
+    - "without new"
+  symptom_targets:
+    - "pain"
+    - "weakness"
+    - "numb(?:ness)?"
+    - "tingling"
+    - "sensation"
+    - "deficit"
+    - "symptoms?"
+
+negation:
+  cues:
+    - "\\bno\\b"
+    - "\\bnot\\b"
+    - "\\bwithout\\b"
+    - "\\bdenies?\\b"
+    - "\\bdenied\\b"
+    - "\\bnegative for\\b"
+    - "\\bfree of\\b"
+    - "\\babsence of\\b"
+    - "\\bno longer\\b"
+    - "\\b(weakness|weak)\\b"
+    - "\\b(surgery|surgeries)\\b"
+  preop_symptom_ignore_pattern: "\\bpre[\\s\\-]?op(?:erative)?\\s+(?:symptom(?:s)?|sx|symptomatology)\\b"
+  window_chars: 40
+  forward_look_chars: 20
+
+date_guard:
+  patterns:
+    - "\\b\\d{1,2}[/-]\\d{1,2}[/-]\\d{2,4}\\b"
+    - "\\b\\d{4}[/-]\\d{1,2}[/-]\\d{1,2}\\b"
+    - "\\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\\s+\\d{1,2}(?:st|nd|rd|th)?(?:,)?\\s+\\d{2,4}\\b"
+    - "\\b\\d{1,2}(?:st|nd|rd|th)?\\s+(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?)\\s+\\d{2,4}\\b"
+
+
+improvement:
+  cues:
+    - "\\bimprov(?:ed|ing|ement)\\b"
+    - "\\bbetter\\b"
+    - "\\bmuch better\\b"
+    - "\\bsignificant(?:ly)? better\\b"
+    - "\\bdoing well\\b"
+    - "\\brespond(?:ed|ing) well\\b"
+    - "\\brelief\\b"
+    - "\\bresolved\\b"
+    - "\\bnearly resolved\\b"
+    - "\\bcomplete(?:ly)? resolved\\b"
+    - "\\bsubsid(?:ed|ing)\\b"
+    - "\\bdecreas(?:ed|ing)\\b"
+    - "\\bmarked improvement\\b"
+    - "\\bgood improvement\\b"
+    - "\\bvery good improvement\\b"
+  targets:
+    - "\\bpain\\b"
+    - "\\bsymptoms?\\b"
+    - "\\bradicul(?:opathy|ar)\\b"
+    - "\\bweakness\\b"
+    - "\\bnumb(?:ness)?\\b"
+    - "\\btingling\\b"
+    - "\\bparesthes(?:ia|ias)\\b"
+  negators:
+    - "\\bno improvement\\b"
+    - "\\bnot improved\\b"
+    - "\\bwithout improvement\\b"
+    - "\\bfails? to improve\\b"
+    - "\\bworse\\b"
+    - "\\bworsen(?:ed|ing)\\b"
+    

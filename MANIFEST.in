@@ -1,0 +1,1 @@
+recursive-include src/chronic_pain_nlp/rules *.yaml

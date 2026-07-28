@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+title: chronic-pain-nlp
+message: "Please cite this software and the associated publication when available."
+type: software
+version: 0.1.0
+date-released: 2026-07-28
+authors:
+  - name: "Madeline Holt"
+repository-code: "link"
+license: MIT
